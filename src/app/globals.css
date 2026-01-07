@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Define the Shadcn Theme Variables */
+@layer base {
+  :root {
+    --background: 34 40% 92%;
+    --foreground: 200 10% 20%;
+    
+    --card: 34 40% 96%;
+    --card-foreground: 200 10% 20%;
+    
+    --popover: 34 40% 96%;
+    --popover-foreground: 200 10% 20%;
+    
+    --primary: 14 67% 56%;
+    --primary-foreground: 34 40% 95%;
+    
+    --secondary: 140 25% 30%;
+    --secondary-foreground: 34 40% 95%;
+    
+    --muted: 34 20% 85%;
+    --muted-foreground: 200 5% 40%;
+    
+    --accent: 14 67% 90%;
+    --accent-foreground: 14 67% 30%;
+    
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 34 40% 95%;
+    
+    --border: 34 20% 80%;
+    --input: 34 20% 80%;
+    --ring: 14 67% 56%;
+    
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 140 30% 10%;
+    --foreground: 34 30% 90%;
+    
+    --card: 140 25% 13%;
+    --card-foreground: 34 30% 90%;
+    
+    --popover: 140 25% 13%;
+    --popover-foreground: 34 30% 90%;
+    
+    --primary: 14 60% 60%;
+    --primary-foreground: 34 40% 95%;
+    
+    --secondary: 140 20% 20%;
+    --secondary-foreground: 34 40% 95%;
+    
+    --muted: 140 20% 20%;
+    --muted-foreground: 140 10% 60%;
+    
+    --accent: 140 20% 20%;
+    --accent-foreground: 34 30% 90%;
+    
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 34 40% 95%;
+    
+    --border: 140 20% 25%;
+    --input: 140 20% 25%;
+    --ring: 14 60% 60%;
+  }
+}
+
+/* Map CSS Variables to Tailwind Utilities */
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  
+  --font-sans: 'Montserrat', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+}
+
+/* Base Global Styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-primary;
+  }
+}
