@@ -31,12 +31,19 @@ export interface Property {
   description: string | null
   short_description: string | null
   address: string | null
+  price_per_night: number
   slideshow_images: string[] | null
   gallery_images: string[] | null
   video_url: string | null
   amenities: string[] | null
   rules: string | null
+  is_active: boolean
   created_at: string
+  // Optional: For joined queries
+  locations?: {
+    slug: string
+    name: string
+  }
 }
 
 export interface RoomType {
@@ -60,11 +67,71 @@ export interface Booking {
   guest_name: string
   guest_email: string
   guest_phone: string
-  check_in: string 
+  check_in: string
   check_out: string
   num_guests: number
   total_price: number | null
   status: BookingStatus
   special_requests: string | null
   created_at: string
+}
+
+export interface HeroSlide {
+  id: string
+  image_url: string
+  title: string
+  subtitle: string | null
+  cta_text: string | null
+  cta_url: string | null
+  display_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface CommunityEvent {
+  id: string
+  title: string
+  description: string | null
+  event_date: string
+  location: string | null
+  image_url: string | null
+  registration_open: boolean
+  is_featured: boolean
+  status: 'upcoming' | 'past' | 'cancelled'
+  created_at: string
+}
+
+export interface Testimonial {
+  id: string
+  author: string
+  rating: number
+  content: string
+  source: string
+  avatar_url: string | null
+  is_approved: boolean
+  created_at: string
+}
+
+// Consolidated Property Interface
+export interface Property {
+  id: string
+  location_id: string
+  slug: string
+  name: string
+  description: string | null
+  short_description: string | null
+  address: string | null
+  price_per_night: number
+  slideshow_images: string[] | null
+  gallery_images: string[] | null
+  video_url: string | null
+  amenities: string[] | null
+  rules: string | null
+  is_active: boolean
+  created_at: string
+  // Optional: For joined queries
+  locations?: {
+    slug: string
+    name: string
+  }
 }

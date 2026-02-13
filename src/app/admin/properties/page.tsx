@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from '@supabase/ssr' // Changed import
 import { ImageUpload } from "@/components/ui/image-upload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,7 +31,13 @@ export default function AdminPropertiesPage() {
   const [locations, setLocations] = useState<Location[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  
+
+  // Initialize Authenticated Client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   // Form State
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -41,6 +47,7 @@ export default function AdminPropertiesPage() {
     description: "",
     short_description: "",
     address: "",
+    price_per_night: 0,
     slideshow_images: [] as string[],
     gallery_images: [] as string[],
     rules: ""
@@ -89,6 +96,7 @@ export default function AdminPropertiesPage() {
         description: formData.description,
         short_description: formData.short_description,
         address: formData.address,
+        price_per_night: Number(formData.price_per_night),
         slideshow_images: formData.slideshow_images,
         gallery_images: formData.gallery_images,
         rules: formData.rules
@@ -125,7 +133,7 @@ export default function AdminPropertiesPage() {
     try {
       const { error } = await supabase.from('properties').delete().eq('id', id)
       if (error) throw error
-      
+
       toast.success("Property deleted")
       // Optimistic update
       setProperties(prev => prev.filter(p => p.id !== id))
@@ -137,8 +145,8 @@ export default function AdminPropertiesPage() {
   function resetForm() {
     setEditingId(null)
     setFormData({
-      name: "", slug: "", location_id: "", description: "", 
-      short_description: "", address: "", slideshow_images: [], gallery_images: [], rules: ""
+      name: "", slug: "", location_id: "", description: "",
+      short_description: "", address: "", price_per_night: 0, slideshow_images: [], gallery_images: [], rules: ""
     })
   }
 
@@ -151,6 +159,7 @@ export default function AdminPropertiesPage() {
       description: property.description || "",
       short_description: property.short_description || "",
       address: property.address || "",
+      price_per_night: property.price_per_night || 0,
       slideshow_images: property.slideshow_images || [],
       gallery_images: property.gallery_images || [],
       rules: property.rules || ""
@@ -165,8 +174,8 @@ export default function AdminPropertiesPage() {
           <h1 className="text-3xl font-serif font-bold text-stone-900">Properties</h1>
           <p className="text-stone-500">Manage your sanctuaries and their details.</p>
         </div>
-        
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if(!open) resetForm(); }}>
+
+        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" /> Add Property
@@ -177,7 +186,7 @@ export default function AdminPropertiesPage() {
               <DialogTitle>{editingId ? "Edit Property" : "New Property"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={onSubmit} className="space-y-6 mt-4">
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Name</label>
@@ -185,16 +194,16 @@ export default function AdminPropertiesPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Slug</label>
-                  <Input placeholder="e.g. garden-crib" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} required />
+                  <Input placeholder="e.g. garden-crib" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Location</label>
-                  <Select 
-                    value={formData.location_id} 
-                    onValueChange={(val) => setFormData({...formData, location_id: val})}
+                  <Select
+                    value={formData.location_id}
+                    onValueChange={(val) => setFormData({ ...formData, location_id: val })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Location" />
@@ -208,43 +217,54 @@ export default function AdminPropertiesPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Address</label>
-                  <Input placeholder="Full address..." value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
+                  <Input placeholder="Full address..." value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Price (₹ / night)</label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 2500"
+                    value={formData.price_per_night}
+                    onChange={(e) => setFormData({ ...formData, price_per_night: Number(e.target.value) })}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Hover Slideshow (Max 5)</label>
-                <ImageUpload 
+                <ImageUpload
                   value={formData.slideshow_images}
-                  onChange={(val: string[]) => setFormData({...formData, slideshow_images: val})}
-                  onRemove={(url) => setFormData({...formData, slideshow_images: formData.slideshow_images.filter(x => x !== url)})}
+                  onChange={(val: string[]) => setFormData({ ...formData, slideshow_images: val })}
+                  onRemove={(url) => setFormData({ ...formData, slideshow_images: formData.slideshow_images.filter(x => x !== url) })}
                   maxFiles={5}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Gallery Images (Max 10)</label>
-                <ImageUpload 
+                <ImageUpload
                   value={formData.gallery_images}
-                  onChange={(val: string[]) => setFormData({...formData, gallery_images: val})}
-                  onRemove={(url) => setFormData({...formData, gallery_images: formData.gallery_images.filter(x => x !== url)})}
+                  onChange={(val: string[]) => setFormData({ ...formData, gallery_images: val })}
+                  onRemove={(url) => setFormData({ ...formData, gallery_images: formData.gallery_images.filter(x => x !== url) })}
                   maxFiles={10}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Short Description (Card View)</label>
-                <Input placeholder="One liner..." value={formData.short_description} onChange={(e) => setFormData({...formData, short_description: e.target.value})} />
+                <Input placeholder="One liner..." value={formData.short_description} onChange={(e) => setFormData({ ...formData, short_description: e.target.value })} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Full Description</label>
-                <Textarea placeholder="Tell the story..." className="h-32" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+                <Textarea placeholder="Tell the story..." className="h-32" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">House Rules</label>
-                <Textarea placeholder="Quiet hours, etc..." className="h-24" value={formData.rules} onChange={(e) => setFormData({...formData, rules: e.target.value})} />
+                <Textarea placeholder="Quiet hours, etc..." className="h-24" value={formData.rules} onChange={(e) => setFormData({ ...formData, rules: e.target.value })} />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">

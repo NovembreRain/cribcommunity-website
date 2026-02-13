@@ -9,6 +9,21 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**', // Allow public storage bucket access
       },
+      {
+        protocol: 'https',
+        hostname: 'travellers-crib.hotelsintamilnadu.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'plus.unsplash.com',
+        pathname: '**',
+      },
     ],
   },
 };

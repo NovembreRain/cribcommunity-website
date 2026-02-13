@@ -4,17 +4,18 @@ import { useEffect, useState } from "react" // Import useEffect
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 // Use createBrowserClient for client-side auth checks
-import { createBrowserClient } from '@supabase/ssr' 
-import { 
-  LayoutDashboard, 
-  Hotel, 
-  Map, 
-  CalendarDays, 
-  FileText, 
-  Briefcase, 
+import { createBrowserClient } from '@supabase/ssr'
+import {
+  LayoutDashboard,
+  Hotel,
+  Map,
+  CalendarDays,
+  FileText,
+  Briefcase,
   LogOut,
   Menu,
-  Loader2 // Import Loader
+  Loader2,
+  Images // Import Loader
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -27,6 +28,7 @@ const sidebarItems = [
   { href: "/admin/calendar", label: "Availability", icon: CalendarDays }, // Added Calendar
   { href: "/admin/locations", label: "Locations", icon: Map },
   { href: "/admin/properties", label: "Properties", icon: Hotel },
+  { href: "/admin/hero", label: "Hero Slides", icon: Images },
   { href: "/admin/blog", label: "Blog Posts", icon: FileText },
   { href: "/admin/jobs", label: "Careers", icon: Briefcase },
 ]
@@ -74,15 +76,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {sidebarItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
-          
+
           return (
-            <Link 
-              key={item.href} 
+            <Link
+              key={item.href}
               href={item.href}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                isActive 
-                  ? "bg-primary text-primary-foreground" 
+                isActive
+                  ? "bg-primary text-primary-foreground"
                   : "hover:bg-stone-100 text-stone-600"
               )}
             >
@@ -93,8 +95,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </nav>
       <div className="p-4 border-t border-stone-200">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
           onClick={handleSignOut}
         >

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from '@supabase/ssr' // Changed import
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -30,7 +30,13 @@ export default function AdminJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  
+
+  // Initialize Authenticated Client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
@@ -107,8 +113,8 @@ export default function AdminJobsPage() {
           <h1 className="text-3xl font-serif font-bold text-stone-900">Careers</h1>
           <p className="text-stone-500">Manage job openings and volunteer positions.</p>
         </div>
-        
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if(!open) resetForm(); }}>
+
+        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> Post Job</Button>
           </DialogTrigger>
@@ -119,21 +125,21 @@ export default function AdminJobsPage() {
             <form onSubmit={onSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Job Title</label>
-                <Input placeholder="e.g. Community Manager" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
+                <Input placeholder="e.g. Community Manager" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Department</label>
-                  <Input placeholder="e.g. Operations" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} required />
+                  <Input placeholder="e.g. Operations" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Type</label>
-                  <Input placeholder="e.g. Volunteer" value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} required />
+                  <Input placeholder="e.g. Volunteer" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} required />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Description</label>
-                <Textarea placeholder="Job details..." className="h-32" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
+                <Textarea placeholder="Job details..." className="h-32" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>

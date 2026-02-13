@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from '@supabase/ssr' // Changed import
 import { ImagePlus, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -15,13 +15,19 @@ interface ImageUploadProps {
   maxFiles?: number
 }
 
-export function ImageUpload({ 
-  value = [], 
-  onChange, 
+export function ImageUpload({
+  value = [],
+  onChange,
   onRemove,
-  maxFiles = 1 
+  maxFiles = 1
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+
+  // Initialize Authenticated Client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     try {
@@ -48,14 +54,14 @@ export function ImageUpload({
 
       onChange([...value, ...newUrls])
       toast.success("Image uploaded")
-      
-    } catch (error) {
-      toast.error("Upload failed")
+
+    } catch (error: any) {
+      toast.error("Upload failed", { description: error.message })
       console.error(error)
     } finally {
       setIsUploading(false)
     }
-  }, [value, onChange])
+  }, [value, onChange, supabase]) // Added dependency
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -70,11 +76,11 @@ export function ImageUpload({
         {value.map((url) => (
           <div key={url} className="relative aspect-video rounded-lg overflow-hidden border border-stone-200 group">
             {/* FIX: Added sizes prop for performance */}
-            <Image 
-              fill 
-              className="object-cover" 
-              alt="Image" 
-              src={url} 
+            <Image
+              fill
+              className="object-cover"
+              alt="Image"
+              src={url}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">

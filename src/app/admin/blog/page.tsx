@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from '@supabase/ssr' // Changed import
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { toast } from "sonner"
-import { Loader2, Plus, Pencil, FileText, ExternalLink } from "lucide-react"
+import { Loader2, Plus, Pencil, FileText, ExternalLink, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -34,7 +34,13 @@ export default function AdminBlogPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  
+
+  // Initialize Authenticated Client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
@@ -71,8 +77,12 @@ export default function AdminBlogPage() {
 
     try {
       const payload = {
-        ...formData,
-        cover_image: formData.cover_image[0] || null
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: formData.excerpt,
+        content: formData.content,
+        cover_image: formData.cover_image[0] || null,
+        published: formData.published
       }
 
       if (editingId) {
@@ -87,10 +97,24 @@ export default function AdminBlogPage() {
       setIsOpen(false)
       fetchPosts()
       resetForm()
-    } catch (error) {
-      toast.error("Operation failed")
+    } catch (error: any) {
+      toast.error("Operation failed", { description: error.message })
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Are you sure you want to delete this story?")) return
+
+    try {
+      const { error } = await supabase.from('posts').delete().eq('id', id)
+      if (error) throw error
+
+      toast.success("Story deleted")
+      setPosts(prev => prev.filter(p => p.id !== id))
+    } catch (error) {
+      toast.error("Delete failed")
     }
   }
 
@@ -119,8 +143,8 @@ export default function AdminBlogPage() {
           <h1 className="text-3xl font-serif font-bold text-stone-900">Journal</h1>
           <p className="text-stone-500">Share stories from the community.</p>
         </div>
-        
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if(!open) resetForm(); }}>
+
+        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" /> Write Story</Button>
           </DialogTrigger>
@@ -136,35 +160,35 @@ export default function AdminBlogPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Slug</label>
-                  <Input placeholder="e.g. monsoon-magic" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} required />
+                  <Input placeholder="e.g. monsoon-magic" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Cover Image</label>
-                <ImageUpload 
+                <ImageUpload
                   value={formData.cover_image}
-                  onChange={(val: string[]) => setFormData({...formData, cover_image: val})}
-                  onRemove={() => setFormData({...formData, cover_image: []})}
+                  onChange={(val: string[]) => setFormData({ ...formData, cover_image: val })}
+                  onRemove={() => setFormData({ ...formData, cover_image: [] })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Excerpt (Card View)</label>
-                <Textarea placeholder="Short summary..." className="h-20" value={formData.excerpt} onChange={(e) => setFormData({...formData, excerpt: e.target.value})} />
+                <Textarea placeholder="Short summary..." className="h-20" value={formData.excerpt} onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Content</label>
-                <Textarea placeholder="Write your story here..." className="h-64 font-mono text-sm" value={formData.content} onChange={(e) => setFormData({...formData, content: e.target.value})} required />
+                <Textarea placeholder="Write your story here..." className="h-64 font-mono text-sm" value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} required />
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
                   {/* FIX: Explicitly typed 'checked' as boolean */}
-                  <Switch 
-                    checked={formData.published} 
-                    onCheckedChange={(checked: boolean) => setFormData({...formData, published: checked})} 
+                  <Switch
+                    checked={formData.published}
+                    onCheckedChange={(checked: boolean) => setFormData({ ...formData, published: checked })}
                   />
                   <span className="text-sm text-stone-600">{formData.published ? 'Public' : 'Draft'}</span>
                 </div>
@@ -198,16 +222,21 @@ export default function AdminBlogPage() {
             <div className="p-4 space-y-3">
               <h3 className="font-serif font-bold text-lg line-clamp-1">{post.title}</h3>
               <p className="text-sm text-stone-500 line-clamp-2">{post.excerpt}</p>
-              
+
               <div className="flex justify-between items-center pt-2">
                 <Link href={`/blog/${post.slug}`} target="_blank">
                   <Button variant="ghost" size="sm" className="text-stone-400 hover:text-primary">
                     <ExternalLink className="w-4 h-4 mr-1" /> View
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" onClick={() => handleEdit(post)}>
-                  <Pencil className="w-4 h-4 mr-1" /> Edit
-                </Button>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(post)}>
+                    <Pencil className="w-4 h-4 mr-1" /> Edit
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-400 hover:text-red-600" onClick={() => handleDelete(post.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

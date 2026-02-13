@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from '@supabase/ssr' // Changed import
 import { ImageUpload } from "@/components/ui/image-upload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,7 +23,13 @@ export default function AdminLocationsPage() {
   const [locations, setLocations] = useState<Location[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  
+
+  // Initialize authenticated client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   // Form State
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -99,7 +105,7 @@ export default function AdminLocationsPage() {
     try {
       const { error } = await supabase.from('locations').delete().eq('id', id)
       if (error) throw error
-      
+
       toast.success("Location deleted")
       // Update UI instantly without refetching
       setLocations(prev => prev.filter(l => l.id !== id))
@@ -131,8 +137,8 @@ export default function AdminLocationsPage() {
           <h1 className="text-3xl font-serif font-bold text-stone-900">Locations</h1>
           <p className="text-stone-500">Manage your high-level destinations.</p>
         </div>
-        
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if(!open) resetForm(); }}>
+
+        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" /> Add Location
@@ -150,22 +156,22 @@ export default function AdminLocationsPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Slug (URL)</label>
-                  <Input placeholder="e.g. pondicherry" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} required />
+                  <Input placeholder="e.g. pondicherry" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Cover Image</label>
-                <ImageUpload 
+                <ImageUpload
                   value={formData.cover_image}
-                  onChange={(val: string[]) => setFormData({...formData, cover_image: val})}
-                  onRemove={() => setFormData({...formData, cover_image: []})}
+                  onChange={(val: string[]) => setFormData({ ...formData, cover_image: val })}
+                  onRemove={() => setFormData({ ...formData, cover_image: [] })}
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Description</label>
-                <Textarea placeholder="Description..." className="h-24" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+                <Textarea placeholder="Description..." className="h-24" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -184,11 +190,11 @@ export default function AdminLocationsPage() {
           <div key={loc.id} className="group relative bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-md transition-shadow">
             <div className="relative h-48 bg-stone-100">
               {loc.cover_image ? (
-                <Image 
-                  src={loc.cover_image} 
-                  alt={loc.name} 
-                  fill 
-                  className="object-cover" 
+                <Image
+                  src={loc.cover_image}
+                  alt={loc.name}
+                  fill
+                  className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               ) : (

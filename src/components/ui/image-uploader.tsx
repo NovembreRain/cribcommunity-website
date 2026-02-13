@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
-import { supabase } from "@/lib/supabase"
+import { createBrowserClient } from '@supabase/ssr' // Use SSR client for auth consistency
 import { ImagePlus, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -15,13 +15,19 @@ interface ImageUploadProps {
   maxFiles?: number
 }
 
-export function ImageUpload({ 
-  value, 
-  onChange, 
+export function ImageUpload({
+  value,
+  onChange,
   onRemove,
-  maxFiles = 1 
+  maxFiles = 1
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+
+  // Initialize browser client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     try {
@@ -32,7 +38,7 @@ export function ImageUpload({
         // Create unique filename: timestamp-random-clean_name
         const fileExt = file.name.split('.').pop()
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-        const filePath = `${fileName}`
+        const filePath = `${fileName}` // Removed extra slash
 
         // Upload to 'crib-assets' bucket
         const { error: uploadError } = await supabase.storage
@@ -53,7 +59,7 @@ export function ImageUpload({
 
       onChange([...value, ...newUrls])
       toast.success("Image uploaded successfully")
-      
+
     } catch (error) {
       toast.error("Upload failed", {
         description: "Please check your internet connection and try again."
@@ -62,7 +68,7 @@ export function ImageUpload({
     } finally {
       setIsUploading(false)
     }
-  }, [value, onChange])
+  }, [value, onChange, supabase])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -77,7 +83,7 @@ export function ImageUpload({
     <div className="space-y-4">
       {/* Image Previews Grid */}
       <div className={cn(
-        "grid gap-4", 
+        "grid gap-4",
         value.length > 0 ? "grid-cols-2 md:grid-cols-4 mb-4" : "hidden"
       )}>
         {value.map((url) => (
@@ -102,8 +108,8 @@ export function ImageUpload({
           {...getRootProps()}
           className={cn(
             "relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-2 text-center",
-            isDragActive 
-              ? "border-primary bg-primary/5" 
+            isDragActive
+              ? "border-primary bg-primary/5"
               : "border-stone-200 hover:border-primary/50 hover:bg-stone-50",
             isUploading && "opacity-50 cursor-not-allowed"
           )}
