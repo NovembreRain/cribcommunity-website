@@ -3,6 +3,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { Calendar } from "lucide-react"
 
+export const revalidate = 0
+
 export default async function BlogPage() {
   const { data: posts } = await supabase
     .from('posts')
@@ -14,7 +16,7 @@ export default async function BlogPage() {
     <div className="container px-4 py-12 md:py-20 md:px-6">
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">
-          Journal
+          Blog
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
           Stories from the vines, updates from the community, and guides to life in Auroville.
@@ -27,11 +29,11 @@ export default async function BlogPage() {
             <article className="h-full flex flex-col rounded-xl overflow-hidden border bg-card transition-all hover:shadow-lg">
               <div className="relative h-48 bg-muted">
                 {post.cover_image ? (
-                  <Image 
-                    src={post.cover_image} 
-                    alt={post.title} 
-                    fill 
-                    className="object-cover transition-transform duration-500 group-hover:scale-105" 
+                  <Image
+                    src={post.cover_image}
+                    alt={post.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-secondary/10 text-secondary">

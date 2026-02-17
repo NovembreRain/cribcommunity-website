@@ -108,7 +108,10 @@ export interface Testimonial {
   content: string
   source: string
   avatar_url: string | null
-  is_approved: boolean
+  approved: boolean
+  featured: boolean
+  location: string | null
+  order_position: number
   created_at: string
 }
 
