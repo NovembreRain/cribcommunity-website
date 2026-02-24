@@ -1,20 +1,19 @@
 import type { Metadata } from 'next'
-import { Montserrat, Cormorant_Garamond } from 'next/font/google'
+import { Playfair_Display, Outfit } from 'next/font/google'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
-const montserrat = Montserrat({ 
+const playfairDisplay = Playfair_Display({ 
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-serif',
   display: 'swap',
 })
 
-const cormorant = Cormorant_Garamond({
+const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-serif',
+  variable: '--font-sans',
   display: 'swap',
 })
 
@@ -32,7 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body 
         suppressHydrationWarning
-        className={`${montserrat.variable} ${cormorant.variable} flex flex-col min-h-screen font-sans antialiased bg-[#FDF8F5] text-[#2D2A26]`}
+        className={`${outfit.variable} ${playfairDisplay.variable} flex flex-col min-h-screen font-sans antialiased bg-background text-text-high`}
       >
         <Navbar />
         {/* FIX: Added pt-24 to prevent navbar overlap */}
